@@ -1,17 +1,11 @@
 pipeline {
   agent any
 
-  environment {
-    PATH+PYTHONBIN = "/Users/somyamaheshwari/Library/Python/3.9/bin"
-  }
-
   stages {
-    stage('setup') {
+    stage('Run BrowserStack SDK Test') {
       steps {
         browserstack(credentialsId: 'ab9025db-c1e4-44cb-b909-f9e375051dc8') {
-          sh '''
-            browserstack-sdk tests/testcase.py
-          '''
+          sh 'browserstack-sdk tests/testcase.py'
         }
       }
     }
