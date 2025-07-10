@@ -1,0 +1,10 @@
+userName: somyamaheshwari_uXMq2D
+accessKey: juA59ZB6ahHZRQvqz4Ec
+platforms:
+  - os: Windows
+    osVersion: 10
+    browserName: Chrome
+    browserVersion: 100.0
+buildName: JENKINS_LABEL
+sessionName: BStack Session Name
+seleniumVersion: 4.0.0
