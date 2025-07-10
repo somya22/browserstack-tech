@@ -1,6 +1,8 @@
 pipeline {
   agent any
-
+  environment {
+    PATH = "/Users/somyamaheshwari/Library/Python/3.9/bin:$PATH"
+  }
   stages {
     stage('Run BrowserStack SDK Test') {
       steps {
@@ -10,7 +12,6 @@ pipeline {
       }
     }
   }
-
   post {
     always {
       browserStackReportPublisher 'automate'
