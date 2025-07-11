@@ -1,12 +1,12 @@
 pipeline {
     agent any
-    
+
     environment {
         BROWSERSTACK_USERNAME = credentials('browserstack-username')
         BROWSERSTACK_ACCESS_KEY = credentials('browserstack-access-key')
         BROWSERSTACK_BUILD_NAME = "jenkins-build-${BUILD_NUMBER}"
     }
-    
+
     stages {
         stage('Setup') {
             steps {
@@ -15,14 +15,12 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Run Tests') {
             steps {
-                browserstack(credentialsId: 'browserstack-credentials') {
-                    sh '''
-                        browserstack-sdk tests/test_bstack.py
-                    '''
-                }
+                sh '''
+                    browserstack-sdk tests/test_bstack.py
+                '''
             }
         }
     }
