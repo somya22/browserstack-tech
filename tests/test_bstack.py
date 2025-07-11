@@ -47,7 +47,7 @@ class BStackDemoTest(unittest.TestCase):
             checkbox = driver.find_element(By.XPATH, "//input[@value='Samsung']")
             driver.execute_script("arguments[0].click();", checkbox)
         except:
-            pass  # Silently skip for mobile layout
+            pass
 
     def favorite_product(self, driver, product_name):
         time.sleep(2)
@@ -60,15 +60,14 @@ class BStackDemoTest(unittest.TestCase):
         except:
             return False
 
-    def check_favorites(self, driver, product_name, platform_name):
+    def check_favorites(self, driver, product_name):
         self.wait(driver, By.ID, "favourites").click()
         time.sleep(2)
         try:
             driver.find_element(By.XPATH, f"//p[text()='{product_name}']")
-            print(f"[{platform_name}] {product_name} found in favorites")
+            print(f"{product_name} found in favorites")
             return True
         except:
-            print(f"[{platform_name}] {product_name} NOT found in favorites")
             return False
 
     def run_test_workflow(self, driver, product_name, platform_name):
@@ -76,9 +75,14 @@ class BStackDemoTest(unittest.TestCase):
         self.apply_samsung_filter(driver)
 
         if self.favorite_product(driver, product_name):
-            return self.check_favorites(driver, product_name, platform_name)
+            result = self.check_favorites(driver, product_name)
+            if result:
+                print(f"[{platform_name}] {product_name} favorited successfully")
+            else:
+                print(f"[{platform_name}] {product_name} not in favorites")
+            return result
         else:
-            print(f"[{platform_name}] {product_name} not favorited (possibly layout issue)")
+            print(f"[{platform_name}] Failed to favorite {product_name}")
             return False
 
     def test_windows_chrome(self):
@@ -133,8 +137,8 @@ class BStackDemoTest(unittest.TestCase):
         try:
             result = self.run_test_workflow(driver, "Galaxy S20+", platform_name)
             if not result:
-                print(f"{platform_name} SKIPPED due to layout difference")
-                self.skipTest("Mobile layout difference, skipping")
+                print(f"{platform_name} SKIPPED")
+                self.skipTest("Samsung Galaxy S22 test skipped")
             else:
                 print(f"{platform_name} result: PASS")
                 self.assertTrue(result)
