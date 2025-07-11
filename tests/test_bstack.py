@@ -47,7 +47,7 @@ class BStackDemoTest(unittest.TestCase):
             checkbox = driver.find_element(By.XPATH, "//input[@value='Samsung']")
             driver.execute_script("arguments[0].click();", checkbox)
         except:
-            pass  # silently fail if mobile layout doesn't have checkbox
+            pass  # Silently skip for mobile layout
 
     def favorite_product(self, driver, product_name):
         time.sleep(2)
@@ -60,59 +60,41 @@ class BStackDemoTest(unittest.TestCase):
         except:
             return False
 
-    def check_favorites(self, driver, product_names):
+    def check_favorites(self, driver, product_name, platform_name):
         self.wait(driver, By.ID, "favourites").click()
         time.sleep(2)
-        for name in product_names:
-            try:
-                if driver.find_element(By.XPATH, f"//p[text()='{name}']"):
-                    print(f"{name} found in favorites")
-                    return True
-            except:
-                continue
-        return False
+        try:
+            driver.find_element(By.XPATH, f"//p[text()='{product_name}']")
+            print(f"[{platform_name}] {product_name} found in favorites")
+            return True
+        except:
+            print(f"[{platform_name}] {product_name} NOT found in favorites")
+            return False
 
-    def run_test_workflow(self, driver, is_mobile=False, platform_name="Unknown Platform"):
+    def run_test_workflow(self, driver, product_name, platform_name):
         self.login(driver)
         self.apply_samsung_filter(driver)
 
-        primary_product = "Galaxy S20+"
-        fallback_products = ["Galaxy S21", "Galaxy S20", "Galaxy S9"]
-
-        if self.favorite_product(driver, primary_product):
-            product_checked = primary_product
-        elif is_mobile:
-            for alt in fallback_products:
-                if self.favorite_product(driver, alt):
-                    product_checked = alt
-                    break
-            else:
-                return False
+        if self.favorite_product(driver, product_name):
+            return self.check_favorites(driver, product_name, platform_name)
         else:
+            print(f"[{platform_name}] {product_name} not favorited (possibly layout issue)")
             return False
-
-        result = self.check_favorites(driver, [product_checked] + fallback_products)
-        if result:
-            print(f"[{platform_name}] {product_checked} found in favorites")
-        else:
-            print(f"[{platform_name}] No valid product found in favorites")
-        return result
-
 
     def test_windows_chrome(self):
         platform_name = "Windows 10 Chrome"
         config = {
-        'platform': 'windows',
-        'sessionName': f'{platform_name} Test',
-        'bstack_options': {
-            'os': 'Windows',
-            'osVersion': '10',
-            'browserVersion': '120.0'
+            'platform': 'windows',
+            'sessionName': f'{platform_name} Test',
+            'bstack_options': {
+                'os': 'Windows',
+                'osVersion': '10',
+                'browserVersion': '120.0'
+            }
         }
-    }
         driver = self.create_driver(config)
         try:
-            result = self.run_test_workflow(driver)
+            result = self.run_test_workflow(driver, "Galaxy S20+", platform_name)
             print(f"{platform_name} result: {'PASS' if result else 'FAIL'}")
             self.assertTrue(result)
         finally:
@@ -121,17 +103,17 @@ class BStackDemoTest(unittest.TestCase):
     def test_macos_firefox(self):
         platform_name = "macOS Ventura Firefox"
         config = {
-        'platform': 'macos',
-        'sessionName': f'{platform_name} Test',
-        'bstack_options': {
-            'os': 'OS X',
-            'osVersion': 'Ventura',
-            'browserVersion': 'latest'
+            'platform': 'macos',
+            'sessionName': f'{platform_name} Test',
+            'bstack_options': {
+                'os': 'OS X',
+                'osVersion': 'Ventura',
+                'browserVersion': 'latest'
+            }
         }
-    }
         driver = self.create_driver(config)
         try:
-            result = self.run_test_workflow(driver)
+            result = self.run_test_workflow(driver, "Galaxy S20+", platform_name)
             print(f"{platform_name} result: {'PASS' if result else 'FAIL'}")
             self.assertTrue(result)
         finally:
@@ -140,16 +122,16 @@ class BStackDemoTest(unittest.TestCase):
     def test_samsung_galaxy_s22(self):
         platform_name = "Samsung Galaxy S22 (Mobile)"
         config = {
-        'platform': 'mobile',
-        'deviceName': 'Samsung Galaxy S22',
-        'sessionName': f'{platform_name} Test',
-        'bstack_options': {
-            'osVersion': '12.0'
+            'platform': 'mobile',
+            'deviceName': 'Samsung Galaxy S22',
+            'sessionName': f'{platform_name} Test',
+            'bstack_options': {
+                'osVersion': '12.0'
+            }
         }
-    }
         driver = self.create_driver(config)
         try:
-            result = self.run_test_workflow(driver, is_mobile=True)
+            result = self.run_test_workflow(driver, "Galaxy S20+", platform_name)
             if not result:
                 print(f"{platform_name} SKIPPED due to layout difference")
                 self.skipTest("Mobile layout difference, skipping")
@@ -158,6 +140,7 @@ class BStackDemoTest(unittest.TestCase):
                 self.assertTrue(result)
         finally:
             driver.quit()
+
 
 if __name__ == "__main__":
     unittest.main()
