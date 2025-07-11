@@ -18,7 +18,7 @@ pipeline {
             steps {
                 browserstack(credentialsId: 'ab9025db-c1e4-44cb-b909-f9e375051dc8') {
                     sh '''
-                        browserstack-sdk tests/test_bstack.py
+                        sh 'python3 tests/test_bstack.py'
                     '''
                 }
             }
