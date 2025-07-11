@@ -1,21 +1,20 @@
-auth:
-  username: "somyamaheshwari_uXMq2D"
-  access_key: "juA59ZB6ahHZRQvqz4Ec"
+# BrowserStack Configuration
+userName: somyamaheshwari_uXMq2D
+accessKey: juA59ZB6ahHZRQvqz4Ec
 
 platforms:
-  - os: Windows
+  - browserName: Chrome
+    os: Windows
     osVersion: 10
-    browserName: Chrome
     browserVersion: 120.0
-  - os: OS X
+  - browserName: Firefox
+    os: OS X
     osVersion: Ventura
-    browserName: Firefox
     browserVersion: latest
-  - deviceName: "Samsung Galaxy S22"
+  - browserName: chrome
     osVersion: 12.0
-    browserName: samsung
+    deviceName: Samsung Galaxy S22
+    realMobile: true
 
-buildName: "browserstack-build-${BUILD_NUMBER}"
-projectName: "BrowserStack Jenkins Python Selenium"
+buildIdentifier: ${BUILD_NUMBER}
 consoleLogs: info
-local: false
