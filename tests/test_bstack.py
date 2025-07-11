@@ -72,7 +72,7 @@ class BStackDemoTest(unittest.TestCase):
                 continue
         return False
 
-    def run_test_workflow(self, driver, is_mobile=False):
+    def run_test_workflow(self, driver, is_mobile=False, platform_name="Unknown Platform"):
         self.login(driver)
         self.apply_samsung_filter(driver)
 
@@ -91,56 +91,73 @@ class BStackDemoTest(unittest.TestCase):
         else:
             return False
 
-        return self.check_favorites(driver, [product_checked] + fallback_products)
+        result = self.check_favorites(driver, [product_checked] + fallback_products)
+        if result:
+            print(f"[{platform_name}] {product_checked} found in favorites")
+        else:
+            print(f"[{platform_name}] No valid product found in favorites")
+        return result
+
 
     def test_windows_chrome(self):
+        platform_name = "Windows 10 Chrome"
         config = {
-            'platform': 'windows',
-            'sessionName': 'Windows 10 Chrome Test',
-            'bstack_options': {
-                'os': 'Windows',
-                'osVersion': '10',
-                'browserVersion': '120.0'
-            }
+        'platform': 'windows',
+        'sessionName': f'{platform_name} Test',
+        'bstack_options': {
+            'os': 'Windows',
+            'osVersion': '10',
+            'browserVersion': '120.0'
         }
+    }
         driver = self.create_driver(config)
         try:
-            self.assertTrue(self.run_test_workflow(driver))
+            result = self.run_test_workflow(driver)
+            print(f"{platform_name} result: {'PASS' if result else 'FAIL'}")
+            self.assertTrue(result)
         finally:
             driver.quit()
 
     def test_macos_firefox(self):
+        platform_name = "macOS Ventura Firefox"
         config = {
-            'platform': 'macos',
-            'sessionName': 'macOS Ventura Firefox Test',
-            'bstack_options': {
-                'os': 'OS X',
-                'osVersion': 'Ventura',
-                'browserVersion': 'latest'
-            }
+        'platform': 'macos',
+        'sessionName': f'{platform_name} Test',
+        'bstack_options': {
+            'os': 'OS X',
+            'osVersion': 'Ventura',
+            'browserVersion': 'latest'
         }
+    }
         driver = self.create_driver(config)
         try:
-            self.assertTrue(self.run_test_workflow(driver))
+            result = self.run_test_workflow(driver)
+            print(f"{platform_name} result: {'PASS' if result else 'FAIL'}")
+            self.assertTrue(result)
         finally:
             driver.quit()
 
     def test_samsung_galaxy_s22(self):
+        platform_name = "Samsung Galaxy S22 (Mobile)"
         config = {
-            'platform': 'mobile',
-            'deviceName': 'Samsung Galaxy S22',
-            'sessionName': 'Samsung Galaxy S22 Test',
-            'bstack_options': {
-                'osVersion': '12.0'
-            }
+        'platform': 'mobile',
+        'deviceName': 'Samsung Galaxy S22',
+        'sessionName': f'{platform_name} Test',
+        'bstack_options': {
+            'osVersion': '12.0'
         }
+    }
         driver = self.create_driver(config)
         try:
-            if not self.run_test_workflow(driver, is_mobile=True):
+            result = self.run_test_workflow(driver, is_mobile=True)
+            if not result:
+                print(f"{platform_name} SKIPPED due to layout difference")
                 self.skipTest("Mobile layout difference, skipping")
+            else:
+                print(f"{platform_name} result: PASS")
+                self.assertTrue(result)
         finally:
             driver.quit()
-
 
 if __name__ == "__main__":
     unittest.main()
