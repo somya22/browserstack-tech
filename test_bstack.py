@@ -72,7 +72,7 @@ class BStackDemoTest(unittest.TestCase):
                 continue
         return False
 
-    def run_test_workflow(self, driver, is_mobile=False):
+    def run_test_workflow(self, driver, is_mobile=False, platform_name="Unknown Platform"):
         self.login(driver)
         self.apply_samsung_filter(driver)
 
@@ -158,6 +158,6 @@ class BStackDemoTest(unittest.TestCase):
                 self.assertTrue(result)
         finally:
             driver.quit()
-            
+
 if __name__ == "__main__":
     unittest.main()
