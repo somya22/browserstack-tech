@@ -16,7 +16,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                browserstack(credentialsId: 'browserstack-credentials') {
+                browserstack(credentialsId: 'ab9025db-c1e4-44cb-b909-f9e375051dc8') {
                     sh '''
                         browserstack-sdk tests/test_bstack.py
                     '''
