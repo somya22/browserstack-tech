@@ -60,14 +60,16 @@ class BStackDemoTest(unittest.TestCase):
         except:
             return False
 
-    def check_favorites(self, driver, product_name):
+        
+    def check_favorites(self, driver, product_name, platform_name):
         self.wait(driver, By.ID, "favourites").click()
         time.sleep(2)
         try:
             driver.find_element(By.XPATH, f"//p[text()='{product_name}']")
-            print(f"{product_name} found in favorites")
+            print(f"[{platform_name}] '{product_name}' was favorited successfully and found in Favorites")
             return True
         except:
+            print(f"[{platform_name}] '{product_name}' was not found in Favorites")
             return False
 
     def run_test_workflow(self, driver, product_name, platform_name):
@@ -75,15 +77,11 @@ class BStackDemoTest(unittest.TestCase):
         self.apply_samsung_filter(driver)
 
         if self.favorite_product(driver, product_name):
-            result = self.check_favorites(driver, product_name)
-            if result:
-                print(f"[{platform_name}] {product_name} favorited successfully")
-            else:
-                print(f"[{platform_name}] {product_name} not in favorites")
-            return result
+            return self.check_favorites(driver, product_name, platform_name)
         else:
-            print(f"[{platform_name}] Failed to favorite {product_name}")
+            print(f"[{platform_name}] Failed to favorite '{product_name}'")
             return False
+
 
     def test_windows_chrome(self):
         platform_name = "Windows 10 Chrome"
