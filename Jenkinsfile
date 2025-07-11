@@ -1,20 +1,29 @@
 pipeline {
-  agent any
-  environment {
-    PATH = "/Users/somyamaheshwari/Library/Python/3.9/bin:$PATH"
-  }
-  stages {
-    stage('Run BrowserStack SDK Test') {
-      steps {
-        browserstack(credentialsId: 'ab9025db-c1e4-44cb-b909-f9e375051dc8') {
-          sh 'browserstack-sdk tests/testcase.py'
+    agent any
+    
+    environment {
+        BROWSERSTACK_USERNAME = credentials('browserstack-username')
+        BROWSERSTACK_ACCESS_KEY = credentials('browserstack-access-key')
+        BROWSERSTACK_BUILD_NAME = "jenkins-build-${BUILD_NUMBER}"
+    }
+    
+    stages {
+        stage('Setup') {
+            steps {
+                sh '''
+                    pip install -r requirements.txt
+                '''
+            }
         }
-      }
+        
+        stage('Run Tests') {
+            steps {
+                browserstack(credentialsId: 'browserstack-credentials') {
+                    sh '''
+                        browserstack-sdk tests/test_bstack.py
+                    '''
+                }
+            }
+        }
     }
-  }
-  post {
-    always {
-      browserStackReportPublisher 'automate'
-    }
-  }
 }
