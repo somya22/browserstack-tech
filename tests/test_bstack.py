@@ -1,6 +1,7 @@
 import os
 import unittest
 import time
+import yaml
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -9,25 +10,53 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class BStackDemoTest(unittest.TestCase):
 
-    def create_driver(self, config):
-        options = webdriver.ChromeOptions() if config['platform'] != 'macos' else webdriver.FirefoxOptions()
-        if config['platform'] == 'mobile':
-            options.set_capability('deviceName', config['deviceName'])
-            options.set_capability('realMobile', 'true')
+    def load_config(self):
+        # Load config from project root (one level up from tests/ folder)
+        config_path = os.path.join(os.path.dirname(__file__), '..', 'browserstack.yml')
+        with open(config_path, 'r') as file:
+            config = yaml.safe_load(file)
+        return config
 
+    def create_driver(self, platform_config):
+        browser_name = platform_config.get('browserName', 'chrome').lower()
+        
+        if browser_name == 'firefox':
+            options = webdriver.FirefoxOptions()
+        else:
+            options = webdriver.ChromeOptions()
+        
+        options.set_capability('browserName', platform_config['browserName'])
+        
+        if 'deviceName' in platform_config:
+            options.set_capability('deviceName', platform_config['deviceName'])
+            options.set_capability('realMobile', platform_config.get('realMobile', True))
+        
         bstack_opts = {
             'userName': os.environ.get('BROWSERSTACK_USERNAME'),
             'accessKey': os.environ.get('BROWSERSTACK_ACCESS_KEY'),
-            'buildName': 'BStack Demo',
-            'sessionName': config['sessionName']
+            'buildName': 'BStack Demo YAML Config',
+            'sessionName': self.get_session_name(platform_config)
         }
-        bstack_opts.update(config['bstack_options'])
+        
+        if 'os' in platform_config:
+            bstack_opts['os'] = platform_config['os']
+        if 'osVersion' in platform_config:
+            bstack_opts['osVersion'] = platform_config['osVersion']
+        if 'browserVersion' in platform_config:
+            bstack_opts['browserVersion'] = platform_config['browserVersion']
+            
         options.set_capability('bstack:options', bstack_opts)
 
         return webdriver.Remote(
             command_executor='https://hub-cloud.browserstack.com/wd/hub',
             options=options
         )
+
+    def get_session_name(self, platform_config):
+        if 'deviceName' in platform_config:
+            return f"{platform_config['deviceName']} {platform_config['browserName']}"
+        else:
+            return f"{platform_config['os']} {platform_config['osVersion']} {platform_config['browserName']}"
 
     def wait(self, driver, by, value, timeout=10):
         return WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
@@ -36,9 +65,17 @@ class BStackDemoTest(unittest.TestCase):
         driver.get("https://bstackdemo.com")
         self.wait(driver, By.ID, "signin").click()
         self.wait(driver, By.ID, "username").click()
-        self.wait(driver, By.XPATH, "//div[text()='demouser']").click()
+        
+        # Use the dropdown to select demouser (avoid hardcoding in XPath)
+        username_dropdown = self.wait(driver, By.CSS_SELECTOR, "select#username option[value='demouser']")
+        username_dropdown.click()
+        
         self.wait(driver, By.ID, "password").click()
-        self.wait(driver, By.XPATH, "//div[text()='testingisfun99']").click()
+        
+        # Use the dropdown to select password (avoid hardcoding in XPath)  
+        password_dropdown = self.wait(driver, By.CSS_SELECTOR, "select#password option[value='testingisfun99']")
+        password_dropdown.click()
+        
         self.wait(driver, By.ID, "login-btn").click()
 
     def apply_samsung_filter(self, driver):
@@ -60,7 +97,6 @@ class BStackDemoTest(unittest.TestCase):
         except:
             return False
 
-        
     def check_favorites(self, driver, product_name, platform_name):
         self.wait(driver, By.ID, "favourites").click()
         time.sleep(2)
@@ -82,19 +118,12 @@ class BStackDemoTest(unittest.TestCase):
             print(f"[{platform_name}] Failed to favorite '{product_name}'")
             return False
 
-
     def test_windows_chrome(self):
-        platform_name = "Windows 10 Chrome"
-        config = {
-            'platform': 'windows',
-            'sessionName': f'{platform_name} Test',
-            'bstack_options': {
-                'os': 'Windows',
-                'osVersion': '10',
-                'browserVersion': '120.0'
-            }
-        }
-        driver = self.create_driver(config)
+        config = self.load_config()
+        platform_config = config['platforms'][0]  # First platform (Windows Chrome)
+        platform_name = self.get_session_name(platform_config)
+        
+        driver = self.create_driver(platform_config)
         try:
             result = self.run_test_workflow(driver, "Galaxy S20+", platform_name)
             print(f"{platform_name} result: {'PASS' if result else 'FAIL'}")
@@ -103,17 +132,11 @@ class BStackDemoTest(unittest.TestCase):
             driver.quit()
 
     def test_macos_firefox(self):
-        platform_name = "macOS Ventura Firefox"
-        config = {
-            'platform': 'macos',
-            'sessionName': f'{platform_name} Test',
-            'bstack_options': {
-                'os': 'OS X',
-                'osVersion': 'Ventura',
-                'browserVersion': 'latest'
-            }
-        }
-        driver = self.create_driver(config)
+        config = self.load_config()
+        platform_config = config['platforms'][1]  # Second platform (macOS Firefox)
+        platform_name = self.get_session_name(platform_config)
+        
+        driver = self.create_driver(platform_config)
         try:
             result = self.run_test_workflow(driver, "Galaxy S20+", platform_name)
             print(f"{platform_name} result: {'PASS' if result else 'FAIL'}")
@@ -122,24 +145,15 @@ class BStackDemoTest(unittest.TestCase):
             driver.quit()
 
     def test_samsung_galaxy_s22(self):
-        platform_name = "Samsung Galaxy S22 (Mobile)"
-        config = {
-            'platform': 'mobile',
-            'deviceName': 'Samsung Galaxy S22',
-            'sessionName': f'{platform_name} Test',
-            'bstack_options': {
-                'osVersion': '12.0'
-            }
-        }
-        driver = self.create_driver(config)
+        config = self.load_config()
+        platform_config = config['platforms'][2]  # Third platform (Samsung Galaxy S22)
+        platform_name = self.get_session_name(platform_config)
+        
+        driver = self.create_driver(platform_config)
         try:
             result = self.run_test_workflow(driver, "Galaxy S20+", platform_name)
-            if not result:
-                print(f"{platform_name} SKIPPED")
-                self.skipTest("Samsung Galaxy S22 test skipped")
-            else:
-                print(f"{platform_name} result: PASS")
-                self.assertTrue(result)
+            print(f"{platform_name} result: {'PASS' if result else 'FAIL'}")
+            self.assertTrue(result)
         finally:
             driver.quit()
 
