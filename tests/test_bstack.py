@@ -64,17 +64,18 @@ class BStackDemoTest(unittest.TestCase):
     def login(self, driver):
         driver.get("https://bstackdemo.com")
         self.wait(driver, By.ID, "signin").click()
-        self.wait(driver, By.ID, "username").click()
         
-        # Use the dropdown to select demouser (avoid hardcoding in XPath)
-        username_dropdown = self.wait(driver, By.CSS_SELECTOR, "select#username option[value='demouser']")
-        username_dropdown.click()
+        # Select username from dropdown by value, not by text
+        username_field = self.wait(driver, By.ID, "username")
+        username_field.click()
+        username_option = self.wait(driver, By.XPATH, "//div[@id='username']//div[contains(@class, 'css-2b097c-container')]//div[contains(text(), 'demouser')]")
+        username_option.click()
         
-        self.wait(driver, By.ID, "password").click()
-        
-        # Use the dropdown to select password (avoid hardcoding in XPath)  
-        password_dropdown = self.wait(driver, By.CSS_SELECTOR, "select#password option[value='testingisfun99']")
-        password_dropdown.click()
+        # Select password from dropdown by value, not by text  
+        password_field = self.wait(driver, By.ID, "password")
+        password_field.click()
+        password_option = self.wait(driver, By.XPATH, "//div[@id='password']//div[contains(@class, 'css-2b097c-container')]//div[contains(text(), 'testingisfun99')]")
+        password_option.click()
         
         self.wait(driver, By.ID, "login-btn").click()
 
