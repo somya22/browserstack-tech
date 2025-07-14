@@ -1,7 +1,6 @@
 # BrowserStack Configuration
-userName: somyamaheshwari_uXMq2D
-accessKey: juA59ZB6ahHZRQvqz4Ec
-
+userName: ${BROWSERSTACK_USERNAME}
+accessKey: ${BROWSERSTACK_ACCESS_KEY}
 platforms:
   - browserName: Chrome
     os: Windows
@@ -15,6 +14,5 @@ platforms:
     osVersion: 12.0
     deviceName: Samsung Galaxy S22
     realMobile: true
-
 buildIdentifier: ${BUILD_NUMBER}
 consoleLogs: info
