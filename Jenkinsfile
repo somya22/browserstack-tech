@@ -18,7 +18,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 browserstack(credentialsId: 'ab9025db-c1e4-44cb-b909-f9e375051dc8') {
-                    sh 'python3 -m unittest tests/test_bstack.py'
+                    sh 'python3 -m unittest tests/test1_bstack.py'
                 }
             }
         }
