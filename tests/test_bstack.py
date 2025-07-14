@@ -64,19 +64,10 @@ class BStackDemoTest(unittest.TestCase):
     def login(self, driver):
         driver.get("https://bstackdemo.com")
         self.wait(driver, By.ID, "signin").click()
-        
-        # Select username from dropdown by value, not by text
-        username_field = self.wait(driver, By.ID, "username")
-        username_field.click()
-        username_option = self.wait(driver, By.XPATH, "//div[@id='username']//div[contains(@class, 'css-2b097c-container')]//div[contains(text(), 'demouser')]")
-        username_option.click()
-        
-        # Select password from dropdown by value, not by text  
-        password_field = self.wait(driver, By.ID, "password")
-        password_field.click()
-        password_option = self.wait(driver, By.XPATH, "//div[@id='password']//div[contains(@class, 'css-2b097c-container')]//div[contains(text(), 'testingisfun99')]")
-        password_option.click()
-        
+        self.wait(driver, By.ID, "username").click()
+        self.wait(driver, By.XPATH, "//div[text()='demouser']").click()
+        self.wait(driver, By.ID, "password").click()
+        self.wait(driver, By.XPATH, "//div[text()='testingisfun99']").click()
         self.wait(driver, By.ID, "login-btn").click()
 
     def apply_samsung_filter(self, driver):
